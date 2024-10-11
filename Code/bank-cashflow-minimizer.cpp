@@ -1,4 +1,9 @@
-#include <bits/stdc++.h>
+#include <iostream>
+#include <algorithm>
+#include <vector>
+#include <set>
+#include <unordered_map>
+#include <limits.h>
 using namespace std;
 
 class bank{
@@ -39,8 +44,8 @@ int getMaxIndex(bank listOfNetAmounts[],int numBanks){
 }
 
 // This function finds the index of the bank with the maximum net amount that has at least one common payment mode with the bank at the given minIndex. It also returns the common payment mode.
-// TC-O(numBanks * maxNumTypes)
-pair<int,string> commonPaymentMaxIndex(bank listOfNetAmounts[],int numBanks,int minIndex,bank input[],int maxNumTypes){
+// TC-O(numBanks * maxPaymentModes)
+pair<int,string> commonPaymentMaxIndex(bank listOfNetAmounts[],int numBanks,int minIndex,bank input[],int maxPaymentModes){
     int max=INT_MIN;
     int maxIndex=-1;
     string matchingType;
@@ -53,7 +58,7 @@ pair<int,string> commonPaymentMaxIndex(bank listOfNetAmounts[],int numBanks,int 
         //TODO 
         //see complexity of intersection
         
-        vector<string> v(maxNumTypes);
+        vector<string> v(maxPaymentModes);
         //set_intersection: This standard C++ function finds the common elements between two sorted ranges (types lists of two banks in this case) and stores the result in vector v.
         vector<string>::iterator ls=set_intersection(listOfNetAmounts[minIndex].paymentModes.begin(),listOfNetAmounts[minIndex].paymentModes.end(), listOfNetAmounts[i].paymentModes.begin(),listOfNetAmounts[i].paymentModes.end(), v.begin());
         //The result is stored in v, and ls points to the end of the common payment modes.
@@ -117,7 +122,7 @@ void printAns(vector<vector<pair<int,string>>> ansGraph, int numBanks,bank input
 }
 
 // This is the main function that performs the cash flow minimization algorithm:
-void minimizeCashFlow(int numBanks,bank input[],unordered_map<string,int>& indexOf,int numTransactions,vector<vector<int>>& graph,int maxNumTypes){
+void minimizeCashFlow(int numBanks,bank input[],unordered_map<string,int>& indexOf,int numTransactions,vector<vector<int>>& graph,int maxPaymentModes){
     
     //Find net amount of each bank has
     bank listOfNetAmounts[numBanks];
@@ -160,7 +165,7 @@ void minimizeCashFlow(int numBanks,bank input[],unordered_map<string,int>& index
     while(numZeroNetAmounts!=numBanks){
         
         int minIndex=getMinIndex(listOfNetAmounts, numBanks);
-        pair<int,string> maxAns = commonPaymentMaxIndex(listOfNetAmounts, numBanks, minIndex,input,maxNumTypes);
+        pair<int,string> maxAns = commonPaymentMaxIndex(listOfNetAmounts, numBanks, minIndex,input,maxPaymentModes);
         
         int maxIndex = maxAns.first;
         
@@ -218,7 +223,8 @@ int main()
     cout<<"\n\t\t\t\t********************* Welcome to CASH FLOW MINIMIZER SYSTEM ***********************\n\n\n";
     cout<<"This system minimizes the number of transactions among multiple banks in the different corners of the world that use different modes of payment.There is one world bank (with all payment modes) to act as an intermediary between banks that have no common mode of payment. \n\n";
     cout<<"Enter the number of banks participating in the transactions.\n";
-    int numBanks;cin>>numBanks;
+    int numBanks;
+    cin>>numBanks;
     
     bank input[numBanks];
     unordered_map<string,int> indexOf;//stores index of a bank
@@ -227,7 +233,7 @@ int main()
     cout<<"Bank name ,number of payment modes it has and the payment modes.\n";
     cout<<"Bank name and payment modes should not contain spaces\n";
     
-    int maxNumTypes;
+    int maxPaymentModes;
     for(int i=0; i<numBanks;i++){
         if(i==0){
             cout<<"World Bank : ";
@@ -240,7 +246,7 @@ int main()
         int numTypes;
         cin>>numTypes;
         
-        if(i==0) maxNumTypes = numTypes;
+        if(i==0) maxPaymentModes = numTypes;
         
         string type;
         while(numTypes--){
@@ -273,54 +279,50 @@ int main()
     }
      
     //Solve
-    minimizeCashFlow(numBanks,input,indexOf,numTransactions,graph,maxNumTypes);
+    minimizeCashFlow(numBanks,input,indexOf,numTransactions,graph,maxPaymentModes);
     return 0; 
 } 
 
+//Total Time Complexity = O(numBanks^2 * maxPaymentModes)
+//Total Space Comlexity = O(numBanks^2 * maxPaymentModes)
+
 
 /*
-5
-A 2 t1 t2
-B 1 t1
-C 1 t1
-D 1 t2
-E 1 t2
-4
-B A 300
-C A 700
-D B 500
-E B 500
+                                ********************* Welcome to CASH FLOW MINIMIZER SYSTEM ***********************
 
---------
-5
-World_Bank 2 Google_Pay PayTM
-Bank_B 1 Google_Pay
-Bank_C 1 Google_Pay
-Bank_D 1 PayTM
-Bank_E 1 PayTM
-4
-Bank_B World_Bank 300
-Bank_C World_Bank 700
-Bank_D Bank_B 500
-Bank_E Bank_B 500
 
---------------------
+This system minimizes the number of transactions among multiple banks in the different corners of the world that use different modes of payment.There is one world bank (with all payment modes) to act as an intermediary between banks that have no common mode of payment.
 
+Enter the number of banks participating in the transactions.
 6
-B 3 1 2 3
-C 2 1 2
-D 1 2
-E 2 1 3
-F 1 3
-G 2 2 3
+Enter the details of the banks and transactions as stated:
+Bank name ,number of payment modes it has and the payment modes.
+Bank name and payment modes should not contain spaces
+World Bank : WB 3 GPay AliPay Paytm
+Bank 1 : B1 2 GPay AliPay
+Bank 2 : B2 1 AliPay
+Bank 3 : B3 2 GPay AliPay
+Bank 4 : B4 1 Paytm
+Bank 5 : B5 2 AliPay Paytm
+Enter number of transactions.
 9
-G B 30
-G D 10
-F B 10
-F C 30
-F D 10
-F E 10
-B C 40
-C D 20
-D E 50
+Enter the details of each transaction as stated:Debtor Bank , creditor Bank and amount
+The transactions can be in any order
+0 th transaction : B4 WB 100
+1 th transaction : B4 B1 300
+2 th transaction : B4 B2 100
+3 th transaction : B4 B3 100
+4 th transaction : B5 WB 300
+5 th transaction : B5 B2 100
+6 th transaction : WB B1 400
+7 th transaction : B2 B3 500
+8 th transaction : B1 B2 200
+
+The transactions for minimum cash flow are as follows :
+
+WB pays Rs 600 to B3 via AliPay
+B4 pays Rs 600 to WB via Paytm
+B2 pays Rs 100 to B1 via AliPay
+B5 pays Rs 400 to B1 via AliPay
+
 */
